@@ -21,3 +21,19 @@ class BarsController < ApplicationController
   end
 end
 ```
+
+## What it does:
+
+### In production:
+The `read_phase` and `write_phase` methods simply yield to the block given.  
+
+### In development:
+
+#### `read_phase`
+throws an exception if a database transaction is attempted within its block which is a write.  This is known as a "read transactional violation".
+
+#### `write_phase`
+throws an exception if a database transaction is attempted within its block which is a read.  This is a write transactional violation.
+
+### In test:
+If a transactional violation occurs in a `read_phase` or `write_phase`, the code will continue to run, but the test will fail at the end citing the list of transactional violations that occurred.
