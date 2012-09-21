@@ -1,5 +1,4 @@
-tphases
-=======
+# TPhases
 
 TPhases (Transactional Phases) is a support framework that helps you build your Rails request life cycles into read-only and write-only phases.
 
@@ -25,10 +24,24 @@ class BarsController < ApplicationController
 end
 ```
 
-## What it does:
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'tphases'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install tphases
+
+## Usage
 
 ### In production:
-The `read_phase`, `write_phase`, and `no_transaction_phase` methods simply yield to the block given.  
+The `read_phase`, `write_phase`, and `no_transaction_phase` methods simply yield to the block given.
 
 ### In development:
 
@@ -43,3 +56,11 @@ throws an exception if any database transaction is attempted within its block.
 
 ### In test:
 If a transactional violation occurs in a TPhase, the code will continue to run, but the test will fail at the end citing the list of transactional violations that occurred.
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Added some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
