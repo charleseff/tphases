@@ -2,6 +2,17 @@
 module TPhases
   module Modes
     class PassThroughMode
+      def read_phase
+        yield
+      end
+
+      def write_phase
+        yield
+      end
+
+      def no_transactions_phase
+        yield
+      end
     end
   end
 end

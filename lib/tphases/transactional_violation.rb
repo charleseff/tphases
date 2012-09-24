@@ -1,0 +1,3 @@
+class TransactionalViolation < StandardError
+
+end
