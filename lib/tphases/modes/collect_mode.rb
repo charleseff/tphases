@@ -33,11 +33,6 @@ module TPhases
         end
       end
 
-      def clear_violations_array!
-        @violations = []
-      end
-
-
       private
       # adds an after block for all rspec tests that causes them to fail if
       def add_rspec_after!
