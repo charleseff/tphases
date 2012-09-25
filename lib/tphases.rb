@@ -4,6 +4,6 @@ require "tphases/initialization"
 
 module TPhases
   extend self
-  include TPhases::Config
-  include TPhases::Initialization
+  extend TPhases::Config
+  extend TPhases::Initialization
 end

@@ -15,11 +15,11 @@ module TPhases
         default_mode = begin
           if defined? Rails
             case Rails.env
-              when 'production', 'demo', 'staging' then
+              when 'production', 'staging', 'demo'
                 :pass_through
-              when 'development' then
+              when 'development'
                 :exceptions
-              when 'test' then
+              when 'test'
                 :collect
               else
                 :pass_through
