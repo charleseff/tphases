@@ -9,27 +9,20 @@ module TPhases
     module ExceptionsMode
       include Helpers::TransactionalViolationsHelper
 
-      def read_phase(&block)
-        ActiveSupport::Notifications.subscribed(block, "sql.active_record") do |name, date, date2, sha, args|
-          if read_transactional_violation?(args[:sql])
-            raise TransactionalViolation.new "#{args[:sql]} ran inside of a 'read_phase' block."
-          end
-        end
+      private
+
+      def write_violation_action(sql, caller)
+        raise TransactionalViolation.new "#{sql} ran inside of a 'write_phase' block."
       end
 
-      def write_phase(&block)
-        ActiveSupport::Notifications.subscribed(block, "sql.active_record") do |name, date, date2, sha, args|
-          if write_transactional_violation?(args[:sql])
-            raise TransactionalViolation.new "#{args[:sql]} ran inside of a 'write_phase' block."
-          end
-        end
+      def read_violation_action(sql, caller)
+        raise TransactionalViolation.new "#{sql} ran inside of a 'read_phase' block."
       end
 
-      def no_transactions_phase(&block)
-        ActiveSupport::Notifications.subscribed(block, "sql.active_record") do |name, date, date2, sha, args|
-          raise TransactionalViolation.new "#{args[:sql]} ran inside of a 'no_transactions_phase' block."
-        end
+      def no_transactions_violation_action(sql, caller)
+        raise TransactionalViolation.new "#{sql} ran inside of a 'no_transactions_phase' block."
       end
+
     end
   end
 end
