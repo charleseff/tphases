@@ -24,6 +24,8 @@ class BarsController < ApplicationController
 end
 ```
 
+** Currently supports ActiveRecord only.  Planned support includes Memcached, Redis, MongoDB, and more.
+
 ## Installation
 
 Add this line to your application's Gemfile:

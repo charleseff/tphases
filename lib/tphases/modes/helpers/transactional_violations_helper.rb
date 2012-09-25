@@ -4,17 +4,21 @@ module TPhases
       module TransactionalViolationsHelper
         private
 
-        # retrieves the first word in the string:
-        REGEX = /(.+)\s?/
+        READ_QUERIES  = %w{update commit insert delete}
+        WRITE_QUERIES = %w{show select}
 
         # determines if this query is a read transactional violation (if it is anything besides a read)
         def read_transactional_violation?(sql)
-          %w{update commit insert delete}.include?(sql.split(' ').first.downcase)
+          READ_QUERIES.include?(first_word(sql))
         end
 
         # determines if this query is a write transactional violation (if it is anything besides a write)
         def write_transactional_violation?(sql)
-          %w{show select}.include?(sql.split(' ').first.downcase)
+          WRITE_QUERIES.include?(first_word(sql))
+        end
+
+        def first_word(str)
+          str.split(' ').first.downcase
         end
 
       end

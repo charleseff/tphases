@@ -6,7 +6,7 @@ require 'tphases/modes/helpers/transactional_violations_helper'
 # immediately inside of a TPhase block if a transactional violation occurs
 module TPhases
   module Modes
-    class ExceptionsMode
+    module ExceptionsMode
       include Helpers::TransactionalViolationsHelper
 
       def read_phase(&block)
