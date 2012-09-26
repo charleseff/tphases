@@ -81,7 +81,6 @@ module TPhases
               end
             end
           end
-
         end
 
         # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record

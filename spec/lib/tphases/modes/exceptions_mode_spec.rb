@@ -3,7 +3,7 @@ require 'active_record'
 require 'tphases/modes/exceptions_mode'
 
 describe TPhases::Modes::ExceptionsMode do
-  subject { Class.new { include TPhases::Modes::ExceptionsMode }.new }
+  subject { Module.new { extend TPhases::Modes::ExceptionsMode } }
 
   before do
     dbconfig             = YAML::load(File.open(LIB_ROOT + '/spec/fixtures/database.yml'))

@@ -6,6 +6,22 @@ module TPhases
       include Helpers::TransactionalViolationsHelper
 
       private
+      def violations
+        @violations ||= []
+      end
+
+      def write_violation_action(sql, caller)
+        violations << { :type => :write, :caller => caller, :sql => sql }
+      end
+
+      def read_violation_action(sql, caller)
+        violations << { :type => :read, :caller => caller, :sql => sql }
+      end
+
+      def no_transactions_violation_action(sql, caller)
+        violations << { :type => :no_transactions, :caller => caller, :sql => args[:sql] }
+      end
+
       # adds an after block for all rspec tests that causes them to fail if
       def add_rspec_after!
         RSpec.configure do |config|
@@ -22,22 +38,6 @@ module TPhases
         end
       end
 
-      def violations
-        @violations ||= []
-      end
-
-      def write_violation_action(sql, caller)
-        violations << { :type => :write, :caller => caller, :sql => sql }
-      end
-
-      def read_violation_action(sql, caller)
-        violations << { :type => :read, :caller => caller, :sql => sql }
-      end
-
-
-      def no_transactions_violation_action(sql, caller)
-        violations << { :type => :no_transactions, :caller => caller, :sql => args[:sql] }
-      end
     end
   end
 end
