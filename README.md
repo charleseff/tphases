@@ -1,6 +1,6 @@
 # TPhases
 
-TPhases (Transactional Phases) is a support framework that helps you build your Rails request life cycles into read-only and write-only phases.
+TPhases (Transactional Phases) is a support framework that helps you build your Rails request life cycles into read-only, write-only, and no-transaction-allowed phases.
 
 The way it accomplishes this is with the methods `TPhases.read_phase`, `TPhases.write_phase` and `TPhases.no_transactions_phase` which take blocks.  Here is a simple example inside of a controller action:
 
