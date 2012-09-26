@@ -59,7 +59,8 @@ module TPhases
           def define_phase_methods_without_subscribed_method!
             define_method(:read_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", read_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_block)
+                yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
               end
@@ -67,7 +68,8 @@ module TPhases
 
             define_method(:write_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", write_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_block)
+                yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
               end
@@ -75,7 +77,8 @@ module TPhases
 
             define_method(:no_transactions_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", no_transactions_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_block)
+                yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
               end
