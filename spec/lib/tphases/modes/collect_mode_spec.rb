@@ -7,11 +7,6 @@ describe TPhases::Modes::CollectMode do
 
   include_context "setup mode specs"
 
-  after do
-    # somewhat hacky: todo fix:
-    subject.send :clear_violations
-  end
-
   describe '.no_transactions_phase' do
     it "should add to the violations list for all violations" do
       expect {

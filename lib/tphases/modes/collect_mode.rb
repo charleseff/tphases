@@ -25,10 +25,6 @@ module TPhases
         violations << { :type => :no_transactions, :call_stack => call_stack, :sql => sql }
       end
 
-      def clear_violations
-        violations = []
-      end
-
       # adds an after block for all rspec tests that causes them to fail if
       def add_rspec_after!
         RSpec.configure do |config|
@@ -39,7 +35,7 @@ module TPhases
               end
             ensure
               # reset violations list:
-              clear_violations
+              @violations = []
             end
           end
         end
