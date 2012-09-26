@@ -44,22 +44,22 @@ module TPhases
           # adds methods using the subscribed method
           def define_phase_methods_with_subscribed_method!
             define_method(:read_phase) do |&block|
-              ActiveSupport::Notifications.subscribed(read_phase_block, "sql.active_record", &block)
+              ActiveSupport::Notifications.subscribed(read_phase_subscription_callback, "sql.active_record", &block)
             end
 
             define_method(:write_phase) do |&block|
-              ActiveSupport::Notifications.subscribed(write_phase_block, "sql.active_record", &block)
+              ActiveSupport::Notifications.subscribed(write_phase_subscription_callback, "sql.active_record", &block)
             end
 
             define_method(:no_transactions_phase) do |&block|
-              ActiveSupport::Notifications.subscribed(no_transactions_phase_block, "sql.active_record", &block)
+              ActiveSupport::Notifications.subscribed(no_transactions_phase_subscription_callback, "sql.active_record", &block)
             end
           end
 
           def define_phase_methods_without_subscribed_method!
             define_method(:read_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_subscription_callback)
                 yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
@@ -68,7 +68,7 @@ module TPhases
 
             define_method(:write_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_subscription_callback)
                 yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
@@ -77,7 +77,7 @@ module TPhases
 
             define_method(:no_transactions_phase) do
               begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_block)
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_subscription_callback)
                 yield
               ensure
                 ActiveSupport::Notifications.unsubscribe(subscriber)
@@ -89,7 +89,7 @@ module TPhases
         # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record
         # each call *_violation_action methods which are defined in the implementing module
 
-        def write_phase_block
+        def write_phase_subscription_callback
           Proc.new do |name, date, date2, sha, args|
             if write_transactional_violation?(args[:sql])
               write_violation_action(args[:sql], caller)
@@ -97,7 +97,7 @@ module TPhases
           end
         end
 
-        def read_phase_block
+        def read_phase_subscription_callback
           Proc.new do |name, date, date2, sha, args|
             if read_transactional_violation?(args[:sql])
               read_violation_action(args[:sql], caller)
@@ -105,7 +105,7 @@ module TPhases
           end
         end
 
-        def no_transactions_phase_block
+        def no_transactions_phase_subscription_callback
           Proc.new do |name, date, date2, sha, args|
             no_transactions_violation_action(args[:sql], caller)
           end
