@@ -1,4 +1,3 @@
-require 'active_support/notifications'
 require 'tphases/transactional_violation'
 require 'tphases/modes/helpers/transactional_violations_helper'
 

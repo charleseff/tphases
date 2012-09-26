@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'tphases/modes/helpers/transactional_violations_helper'
 
 describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
-  describe TPhases::Modes::Helpers::TransactionalViolationsHelper::ClassMethods do
-    subject { Class.new { include TPhases::Modes::Helpers::TransactionalViolationsHelper::ClassMethods }.new }
+  describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
+    subject { Class.new { include TPhases::Modes::Helpers::TransactionalViolationsHelper }.new }
 
     let(:write_queries) {
       [
