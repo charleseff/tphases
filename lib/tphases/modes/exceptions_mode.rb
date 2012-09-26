@@ -6,6 +6,8 @@ require 'tphases/modes/helpers/transactional_violations_helper'
 module TPhases
   module Modes
     module ExceptionsMode
+      extend ActiveSupport::Concern
+
       include Helpers::TransactionalViolationsHelper
 
       private

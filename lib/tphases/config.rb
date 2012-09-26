@@ -1,10 +1,15 @@
+require 'active_support/concern'
+
 module TPhases
   module Config
-    # allow for configuration of TPhases
-    def configure(&block)
-      yield config
-    end
+    extend ActiveSupport::Concern
 
+    module ClassMethods
+      # allow for configuration of TPhases
+      def configure(&block)
+        yield config
+      end
+    end
     private
     # the config
     # sets default value `mode` value based on presence of Rails and environment type

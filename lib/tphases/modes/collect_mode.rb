@@ -3,6 +3,8 @@
 module TPhases
   module Modes
     module CollectMode
+      extend ActiveSupport::Concern
+
       include Helpers::TransactionalViolationsHelper
 
       private
