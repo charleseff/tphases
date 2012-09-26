@@ -89,7 +89,7 @@ module TPhases
         def write_phase_block
           Proc.new do |name, date, date2, sha, args|
             if write_transactional_violation?(args[:sql])
-              write_violation_action(args[:sql], caller.first)
+              write_violation_action(args[:sql], caller)
             end
           end
         end
@@ -97,14 +97,14 @@ module TPhases
         def read_phase_block
           Proc.new do |name, date, date2, sha, args|
             if read_transactional_violation?(args[:sql])
-              read_violation_action(args[:sql], caller.first)
+              read_violation_action(args[:sql], caller)
             end
           end
         end
 
         def no_transactions_phase_block
           Proc.new do |name, date, date2, sha, args|
-            no_transactions_violation_action(args[:sql], caller.first)
+            no_transactions_violation_action(args[:sql], caller)
           end
         end
 

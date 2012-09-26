@@ -5,14 +5,7 @@ require 'tphases/modes/exceptions_mode'
 describe TPhases::Modes::ExceptionsMode do
   subject { Module.new { extend TPhases::Modes::ExceptionsMode } }
 
-  before do
-    dbconfig             = YAML::load(File.open(LIB_ROOT + '/spec/fixtures/database.yml'))
-    dbconfig['database'] = LIB_ROOT + '/' + dbconfig['database']
-    ActiveRecord::Base.establish_connection(dbconfig)
-  end
-
-  let(:read_sql) { 'select * from posts' }
-  let(:write_sql) { "insert into posts values ('foobaz')" }
+  include_context "setup mode specs"
 
   describe '.no_transactions_phase' do
     it "should throw an exception disallow read and write transactions from running in this phase" do

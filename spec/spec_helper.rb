@@ -18,4 +18,6 @@ RSpec.configure do |config|
   config.order = 'random'
 end
 
+Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each { |f| require f }
+
 require File.join(File.expand_path('../../', __FILE__), 'lib', 'tphases')
