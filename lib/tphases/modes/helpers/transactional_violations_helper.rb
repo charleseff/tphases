@@ -1,4 +1,5 @@
 require 'active_support/concern'
+require 'active_support/version'
 
 module TPhases
   module Modes
