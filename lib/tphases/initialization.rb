@@ -13,11 +13,11 @@ module TPhases
         when :collect
           require 'tphases/modes/collect_mode'
           extend TPhases::Modes::CollectMode
+          add_rspec_after! if defined?(RSpec)
         else
           raise "TPhases mode must be one of :pass_through, :exceptions, or :collect, but instead is #{config.mode}"
       end
 
-      add_rspec_after! if defined?(RSpec) && config.mode == :collect
     end
 
   end

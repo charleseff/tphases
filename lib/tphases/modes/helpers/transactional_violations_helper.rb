@@ -1,3 +1,5 @@
+require 'active_support/concern'
+
 module TPhases
   module Modes
     module Helpers
@@ -35,36 +37,42 @@ module TPhases
 
           # adds methods using the subscribed method
           def define_phase_methods_with_subscribed_method!
-            def read_phase(&block)
+            define_method(:read_phase) do |&block|
               ActiveSupport::Notifications.subscribed(block, "sql.active_record", read_phase_block)
             end
 
-            def write_phase(&block)
+            define_method(:write_phase) do |&block|
               ActiveSupport::Notifications.subscribed(block, "sql.active_record", write_phase_block)
             end
 
-            def no_transactions_phase(&block)
+            define_method(:no_transactions_phase) do |&block|
               ActiveSupport::Notifications.subscribed(block, "sql.active_record", no_transactions_phase_block)
             end
           end
 
           def define_phase_methods_without_subscribed_method!
-            def read_phase
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", read_phase_block)
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
+            define_method(:read_phase) do
+              begin
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", read_phase_block)
+              ensure
+                ActiveSupport::Notifications.unsubscribe(subscriber)
+              end
             end
 
-            def write_phase
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", write_phase_block)
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
+            define_method(:write_phase) do
+              begin
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", write_phase_block)
+              ensure
+                ActiveSupport::Notifications.unsubscribe(subscriber)
+              end
             end
 
-            def no_transactions_phase
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", no_transactions_phase_block)
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
+            define_method(:no_transactions_phase) do
+              begin
+                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", no_transactions_phase_block)
+              ensure
+                ActiveSupport::Notifications.unsubscribe(subscriber)
+              end
             end
           end
 
