@@ -3,7 +3,7 @@ require 'tphases/modes/helpers/transactional_violations_helper'
 
 describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
   describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
-    subject { Class.new { include TPhases::Modes::Helpers::TransactionalViolationsHelper }.new }
+    subject { Module.new { include TPhases::Modes::Helpers::TransactionalViolationsHelper } }
 
     let(:write_queries) {
       [

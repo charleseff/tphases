@@ -3,7 +3,7 @@ require 'active_record'
 require 'tphases/modes/pass_through_mode'
 
 describe TPhases::Modes::PassThroughMode do
-  subject { Module.new { extend TPhases::Modes::PassThroughMode } }
+  subject { Module.new { include TPhases::Modes::PassThroughMode } }
 
   include_context "setup mode specs"
 

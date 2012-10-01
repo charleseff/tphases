@@ -3,7 +3,7 @@ require 'active_record'
 require 'tphases/modes/exceptions_mode'
 
 describe TPhases::Modes::ExceptionsMode do
-  subject { Module.new { extend TPhases::Modes::ExceptionsMode } }
+  subject { Module.new { include TPhases::Modes::ExceptionsMode } }
 
   include_context "setup mode specs"
 

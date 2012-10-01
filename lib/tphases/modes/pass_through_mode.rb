@@ -2,16 +2,20 @@
 module TPhases
   module Modes
     module PassThroughMode
-      def read_phase
-        yield
-      end
+      extend ActiveSupport::Concern
 
-      def write_phase
-        yield
-      end
+      module ClassMethods
+        def read_phase
+          yield
+        end
 
-      def no_transactions_phase
-        yield
+        def write_phase
+          yield
+        end
+
+        def no_transactions_phase
+          yield
+        end
       end
     end
   end

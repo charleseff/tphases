@@ -3,7 +3,7 @@ require 'active_record'
 require 'tphases/modes/collect_mode'
 
 describe TPhases::Modes::CollectMode do
-  subject { Module.new { extend TPhases::Modes::CollectMode } }
+  subject { Module.new { include TPhases::Modes::CollectMode } }
 
   include_context "setup mode specs"
 

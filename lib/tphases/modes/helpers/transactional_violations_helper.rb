@@ -42,15 +42,15 @@ module TPhases
 
           # adds methods using the subscribed method
           def define_phase_methods_with_subscribed_method!
-            define_method(:read_phase) do |&block|
+            define_singleton_method(:read_phase) do |&block|
               ActiveSupport::Notifications.subscribed(read_phase_subscription_callback, "sql.active_record", &block)
             end
 
-            define_method(:write_phase) do |&block|
+            define_singleton_method(:write_phase) do |&block|
               ActiveSupport::Notifications.subscribed(write_phase_subscription_callback, "sql.active_record", &block)
             end
 
-            define_method(:no_transactions_phase) do |&block|
+            define_singleton_method(:no_transactions_phase) do |&block|
               ActiveSupport::Notifications.subscribed(no_transactions_phase_subscription_callback, "sql.active_record", &block)
             end
           end
@@ -83,48 +83,49 @@ module TPhases
               end
             end
           end
-        end
 
-        # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record
-        # each call *_violation_action methods which are defined in the implementing module
+          # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record
+          # each call *_violation_action methods which are defined in the implementing module
 
-        def write_phase_subscription_callback
-          Proc.new do |name, date, date2, sha, args|
-            if write_transactional_violation?(args[:sql])
-              write_violation_action(args[:sql], caller)
+          def write_phase_subscription_callback
+            Proc.new do |name, date, date2, sha, args|
+              if write_transactional_violation?(args[:sql])
+                write_violation_action(args[:sql], caller)
+              end
             end
           end
-        end
 
-        def read_phase_subscription_callback
-          Proc.new do |name, date, date2, sha, args|
-            if read_transactional_violation?(args[:sql])
-              read_violation_action(args[:sql], caller)
+          def read_phase_subscription_callback
+            Proc.new do |name, date, date2, sha, args|
+              if read_transactional_violation?(args[:sql])
+                read_violation_action(args[:sql], caller)
+              end
             end
           end
-        end
 
-        def no_transactions_phase_subscription_callback
-          Proc.new do |name, date, date2, sha, args|
-            no_transactions_violation_action(args[:sql], caller)
+          def no_transactions_phase_subscription_callback
+            Proc.new do |name, date, date2, sha, args|
+              no_transactions_violation_action(args[:sql], caller)
+            end
           end
-        end
 
-        READ_QUERIES  = %w{update commit insert delete}
-        WRITE_QUERIES = %w{show select}
+          READ_QUERIES  = %w{update commit insert delete}
+          WRITE_QUERIES = %w{show select}
 
-        # determines if this query is a read transactional violation (if it is anything besides a read)
-        def read_transactional_violation?(sql)
-          READ_QUERIES.include?(first_word(sql))
-        end
+          # determines if this query is a read transactional violation (if it is anything besides a read)
+          def read_transactional_violation?(sql)
+            READ_QUERIES.include?(first_word(sql))
+          end
 
-        # determines if this query is a write transactional violation (if it is anything besides a write)
-        def write_transactional_violation?(sql)
-          WRITE_QUERIES.include?(first_word(sql))
-        end
+          # determines if this query is a write transactional violation (if it is anything besides a write)
+          def write_transactional_violation?(sql)
+            WRITE_QUERIES.include?(first_word(sql))
+          end
 
-        def first_word(str)
-          str.split(' ').first.downcase
+          def first_word(str)
+            str.split(' ').first.downcase
+          end
+
         end
 
       end
