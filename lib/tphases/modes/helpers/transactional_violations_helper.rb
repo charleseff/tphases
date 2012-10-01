@@ -1,5 +1,4 @@
 require 'active_support/notifications'
-require 'active_support/concern'
 require 'active_support/version'
 
 module TPhases
@@ -56,7 +55,7 @@ module TPhases
           end
 
           def define_phase_methods_without_subscribed_method!
-            define_method(:read_phase) do |&block|
+            define_singleton_method(:read_phase) do |&block|
               begin
                 subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_subscription_callback)
                 block.call
@@ -65,7 +64,7 @@ module TPhases
               end
             end
 
-            define_method(:write_phase) do |&block|
+            define_singleton_method(:write_phase) do |&block|
               begin
                 subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_subscription_callback)
                 block.call
@@ -74,7 +73,7 @@ module TPhases
               end
             end
 
-            define_method(:no_transactions_phase) do |&block|
+            define_singleton_method(:no_transactions_phase) do |&block|
               begin
                 subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_subscription_callback)
                 block.call

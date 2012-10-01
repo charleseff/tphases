@@ -32,18 +32,18 @@ module TPhases
           violations << { :type => :no_transactions, :call_stack => call_stack, :sql => sql }
         end
 
-        # adds an after block for all rspec tests that causes them to fail if any transactional violations are present
+        # adds an after block for all rspec tests that cause them to fail if any transactional violations are present
         def add_rspec_after!
           RSpec.configure do |config|
             config.after(:each) do
               begin
                 unless TPhases.violations.empty?
-                  fail "This spec had #{TPhases.violations.count} transactional violations: \n\t#{TPhases.violations.map(&:inspect).join("\n\t")}"
+                  #fail "This spec had #{TPhases.violations.count} transactional violations: \n\t#{TPhases.violations.map(&:inspect).join("\n\t")}"
                   fail <<-FAILURE_MESSAGE
                     This spec had #{TPhases.violations.count} transactional violations:
-                      #{TPhases.violations.map do |v|
-                    "- Violation Type: #{v.type},\nSQL: #{v.sql}\nCall Stack: #{v.call_stack.join("\n")}"
-                  end.join("\n\t")}
+                      #{TPhases.violations.each_with_index.map do |violation,index|
+                    "#{index}: Violation Type: #{violation[:type]},\nSQL: #{violation[:sql]}\nCall Stack:\n\t#{violation[:call_stack].join("\n\t")}"
+                  end.join("\n*********************************************************\n")}
                   end
                   FAILURE_MESSAGE
                 end
