@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   description     = %q{TPhases (Transactional Phases) is a support framework that helps you build your Rails request life cycles into read-only and write-only phases.}
   gem.description = description
   gem.summary     = description
-  gem.homepage    = ""
+  gem.homepage    = "https://github.com/charleseff/tphases"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
