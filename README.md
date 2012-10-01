@@ -40,7 +40,9 @@ Or install it yourself as:
 
     $ gem install tphases
 
-Somewhere in the initialization process of your app, call `TPhases.initiate!`
+Somewhere in the initialization process of your app, call 
+
+    TPhases.initiate!
 
 ## Usage
 
