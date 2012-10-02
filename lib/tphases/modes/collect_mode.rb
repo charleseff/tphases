@@ -11,13 +11,12 @@ module TPhases
 
       included do
         add_rspec_after! if defined?(RSpec)
+        @violations = []
       end
 
-      module ClassMethods
 
-        def violations
-          @violations ||= []
-        end
+      module ClassMethods
+        attr_accessor :violations
 
         private
         def write_violation_action(sql, call_stack)
@@ -49,7 +48,7 @@ module TPhases
                 end
               ensure
                 # reset violations list:
-                @violations = []
+                TPhases.violations = []
               end
             end
           end
