@@ -11,6 +11,7 @@ module TPhases
 
       included do
         add_rspec_after! if defined?(RSpec)
+        add_cucumber_after! if defined?(Cucumber)
         @violations = []
       end
 
@@ -34,23 +35,32 @@ module TPhases
         # adds an after block for all rspec tests that cause them to fail if any transactional violations are present
         def add_rspec_after!
           RSpec.configure do |config|
-            config.after(:each) do
-              begin
-                if TPhases.config.collect_mode_failures_on && !TPhases.violations.empty?
-                  fail <<-FAILURE_MESSAGE
+            config.after(:each, &after_test_fail_if_violations_proc)
+          end
+        end
+
+        def add_cucumber_after!
+          Cucumber::RbSupport::RbDsl.register_rb_hook('after', [], after_test_fail_if_violations_proc)
+        end
+
+        # fails if there were any transactional violations
+        def after_test_fail_if_violations_proc
+          Proc.new do
+            begin
+              if TPhases.config.collect_mode_failures_on && !TPhases.violations.empty?
+                fail <<-FAILURE_MESSAGE
                     This spec had #{TPhases.violations.count} transactional violations:
                       #{TPhases.violations.each_with_index.map do |violation, index|
-                    "#{index}: Violation Type: #{violation[:type]},\nSQL: #{violation[:sql]}\nCall Stack:\n\t#{violation[:call_stack].join("\n\t")}"
-                  end.join("\n*********************************************************\n")}
+                  "#{index}: Violation Type: #{violation[:type]},\nSQL: #{violation[:sql]}\nCall Stack:\n\t#{violation[:call_stack].join("\n\t")}"
+                end.join("\n*********************************************************\n")}
                   end
-                  FAILURE_MESSAGE
-                end
-              ensure
-                # reset violations list:
-                TPhases.violations = []
+                FAILURE_MESSAGE
               end
+            ensure
+              TPhases.violations = [] # reset violations list
             end
           end
+
         end
 
       end
