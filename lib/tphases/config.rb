@@ -8,10 +8,16 @@ module TPhases
         yield config
       end
 
-      private
       # the config
+      # settings options are:
+      #
+      # - mode
+      # - collect_mode_failures_on - defaults to true, but can be turned off temporarily to disable failures on
+      #        transaction violations
+      #
       # sets default value `mode` value based on presence of Rails and environment type
       # the default setting is the safest, :pass_through, which means TPhases does nothing.
+      #
       def config
         @config ||= begin
 
@@ -32,7 +38,7 @@ module TPhases
             end
           end
 
-          Struct.new(:mode).new(default_mode)
+          Struct.new(:mode, :collect_mode_failures_on).new(default_mode, true)
         end
       end
 
