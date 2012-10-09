@@ -39,9 +39,11 @@ module TPhases
           end
         end
 
+        # todo: fill me out
+        # for some reason the commented out code isn't working.
         def add_cucumber_after!
-          require 'cucumber/rb_support/rb_dsl'
-          Cucumber::RbSupport::RbDsl.register_rb_hook('after', [], after_test_fail_if_violations_proc)
+          #require 'cucumber/rb_support/rb_dsl'
+          #Cucumber::RbSupport::RbDsl.register_rb_hook('after', [], after_test_fail_if_violations_proc)
         end
 
         # fails if there were any transactional violations
