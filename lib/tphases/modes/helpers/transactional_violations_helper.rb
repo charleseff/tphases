@@ -12,52 +12,49 @@ module TPhases
         extend ActiveSupport::Concern
 
         included do
-          define_phase_methods!
-
           # used to keep track of nested phases.  a nested phase overrides any prior phase.
           @phase_stack = []
         end
 
-        private
         module ClassMethods
 
-          def define_phase_methods!
-            define_singleton_method(:read_phase) do |&block|
-              phase = Phase.new
-              @phase_stack << phase
-              begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_subscription_callback(phase))
-                block.call
-              ensure
-                ActiveSupport::Notifications.unsubscribe(subscriber)
-                @phase_stack.pop
-              end
-            end
-
-            define_singleton_method(:write_phase) do |&block|
-              phase = Phase.new
-              @phase_stack << phase
-              begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_subscription_callback(phase))
-                block.call
-              ensure
-                ActiveSupport::Notifications.unsubscribe(subscriber)
-                @phase_stack.pop
-              end
-            end
-
-            define_singleton_method(:no_transactions_phase) do |&block|
-              phase = Phase.new
-              @phase_stack << phase
-              begin
-                subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_subscription_callback(phase))
-                block.call
-              ensure
-                ActiveSupport::Notifications.unsubscribe(subscriber)
-                @phase_stack.pop
-              end
+          def read_phase
+            phase = Phase.new
+            @phase_stack << phase
+            begin
+              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_subscription_callback(phase))
+              yield
+            ensure
+              ActiveSupport::Notifications.unsubscribe(subscriber)
+              @phase_stack.pop
             end
           end
+
+          def write_phase
+            phase = Phase.new
+            @phase_stack << phase
+            begin
+              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_subscription_callback(phase))
+              yield
+            ensure
+              ActiveSupport::Notifications.unsubscribe(subscriber)
+              @phase_stack.pop
+            end
+          end
+
+          def no_transactions_phase
+            phase = Phase.new
+            @phase_stack << phase
+            begin
+              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_subscription_callback(phase))
+              yield
+            ensure
+              ActiveSupport::Notifications.unsubscribe(subscriber)
+              @phase_stack.pop
+            end
+          end
+
+          private
 
           # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record
           # each call *_violation_action methods which are defined in the implementing module
@@ -108,7 +105,8 @@ module TPhases
         end
 
         # simple class to represent a phase on the stack of phases.  Used to determine which phase is active
-        class Phase; end
+        class Phase;
+        end
 
       end
     end
