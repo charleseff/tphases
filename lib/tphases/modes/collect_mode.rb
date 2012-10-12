@@ -40,8 +40,9 @@ module TPhases
         end
 
         def add_cucumber_after!
-          require 'cucumber/rb_support/rb_dsl'
-          Cucumber::RbSupport::RbDsl.register_rb_hook('after', [], after_test_fail_if_violations_proc)
+          # todo: get me working
+          #require 'cucumber/rb_support/rb_dsl'
+          #Cucumber::RbSupport::RbDsl.register_rb_hook('after', [], after_test_fail_if_violations_proc)
         end
 
         # fails if there were any transactional violations
