@@ -12,90 +12,52 @@ module TPhases
         extend ActiveSupport::Concern
 
         included do
+          define_phase_methods!
+
           # used to keep track of nested phases.  a nested phase overrides any prior phase.
           @phase_stack = []
         end
 
         module ClassMethods
 
-          def read_phase
-            phase = Phase.new
-            @phase_stack << phase
-            begin
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &read_phase_subscription_callback(phase))
-              yield
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
-              @phase_stack.pop
-            end
-          end
+          def define_phase_methods!
+            %w{read write no_transactions}.each do |phase_type|
+              define_singleton_method(:"#{phase_type}_phase") do |&block|
+                phase = Phase.new
+                @phase_stack << phase
+                begin
+                  subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |name, date, date2, sha, args|
+                    next unless @phase_stack.last == phase
+                    if send(:"#{phase_type}_violation?", args[:sql])
+                      send(:"#{phase_type}_violation_action", args[:sql], caller)
+                    end
 
-          def write_phase
-            phase = Phase.new
-            @phase_stack << phase
-            begin
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &write_phase_subscription_callback(phase))
-              yield
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
-              @phase_stack.pop
-            end
-          end
-
-          def no_transactions_phase
-            phase = Phase.new
-            @phase_stack << phase
-            begin
-              subscriber = ActiveSupport::Notifications.subscribe("sql.active_record", &no_transactions_phase_subscription_callback(phase))
-              yield
-            ensure
-              ActiveSupport::Notifications.unsubscribe(subscriber)
-              @phase_stack.pop
+                  end
+                  block.call
+                ensure
+                  ActiveSupport::Notifications.unsubscribe(subscriber)
+                  @phase_stack.pop
+                end
+              end
             end
           end
 
           private
-
-          # the set of blocks that run when an ActiveSupport notification is fired on sql.active_record
-          # each call *_violation_action methods which are defined in the implementing module
-          # each will bail unless this transaction is the last on the stack, allowing for nested phases to override others
-
-          def write_phase_subscription_callback(phase)
-            Proc.new do |name, date, date2, sha, args|
-              next unless @phase_stack.last == phase
-              if write_transactional_violation?(args[:sql])
-                write_violation_action(args[:sql], caller)
-              end
-            end
-          end
-
-          def read_phase_subscription_callback(phase)
-            Proc.new do |name, date, date2, sha, args|
-              next unless @phase_stack.last == phase
-              if read_transactional_violation?(args[:sql])
-                read_violation_action(args[:sql], caller)
-              end
-            end
-          end
-
-          def no_transactions_phase_subscription_callback(phase)
-            Proc.new do |name, date, date2, sha, args|
-              next unless @phase_stack.last == phase
-              no_transactions_violation_action(args[:sql], caller)
-            end
-          end
-
           READ_QUERIES  = %w{update commit insert delete}
           WRITE_QUERIES = %w{show select}
 
           # determines if this query is a read transactional violation (if it is anything besides a read)
-          def read_transactional_violation?(sql)
+          def read_violation?(sql)
             READ_QUERIES.include?(first_word(sql))
           end
 
           # determines if this query is a write transactional violation (if it is anything besides a write)
-          def write_transactional_violation?(sql)
+          def write_violation?(sql)
             WRITE_QUERIES.include?(first_word(sql))
+          end
+
+          def no_transactions_violation?(sql)
+            true
           end
 
           def first_word(str)

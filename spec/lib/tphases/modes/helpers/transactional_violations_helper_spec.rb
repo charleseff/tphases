@@ -22,15 +22,15 @@ describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
 
     describe "#read_transactional_violation?" do
       it "should detect correctly" do
-        read_queries.each { |read_query| expect(subject.send(:read_transactional_violation?, read_query)).to eq(false) }
-        write_queries.each { |write_query| expect(subject.send(:read_transactional_violation?, write_query)).to eq(true) }
+        read_queries.each { |read_query| expect(subject.send(:read_violation?, read_query)).to eq(false) }
+        write_queries.each { |write_query| expect(subject.send(:read_violation?, write_query)).to eq(true) }
       end
     end
 
     describe " #write_transactional_violation?" do
       it "should detect correctly" do
-        read_queries.each { |read_query| expect(subject.send(:write_transactional_violation?, read_query)).to be_true }
-        write_queries.each { |write_query| expect(subject.send(:write_transactional_violation?, write_query)).to be_false }
+        read_queries.each { |read_query| expect(subject.send(:write_violation?, read_query)).to be_true }
+        write_queries.each { |write_query| expect(subject.send(:write_violation?, write_query)).to be_false }
       end
     end
 
