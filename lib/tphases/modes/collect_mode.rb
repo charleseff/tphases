@@ -50,13 +50,16 @@ module TPhases
           Proc.new do
             begin
               if TPhases.config.collect_mode_failures_on && !TPhases.violations.empty?
-                fail <<-FAILURE_MESSAGE
-                    This spec had #{TPhases.violations.count} transactional violations:
-                      #{TPhases.violations.each_with_index.map do |violation, index|
-                  "#{index}: Violation Type: #{violation[:type]},\nSQL: #{violation[:sql]}\nCall Stack:\n\t#{violation[:call_stack].join("\n\t")}"
-                end.join("\n*********************************************************\n")}
-                  end
-                FAILURE_MESSAGE
+
+                fail_message = "This spec had #{TPhases.violations.count} transactional violations:\n"
+                TPhases.violations.each_with_index.map do |violation, index|
+                  fail_message << "*"*50 + "\n"
+                  fail_message << "Violation ##{index+1}, type: #{violation[:type]}\n"
+                  fail_message << "SQL: #{violation[:sql]}\n"
+                  fail_message << "Call Stack: \n\t\t#{TPhases.cleaned_call_stack(violation[:call_stack]).join("\n\t\t")}\n"
+                end
+
+                fail fail_message
               end
             ensure
               TPhases.violations = [] # reset violations list
@@ -64,6 +67,16 @@ module TPhases
           end
 
         end
+
+        public
+        # taken from https://github.com/rails/rails/blob/77977f34a5a4ea899f59e31ad869b582285fa5c1/actionpack/lib/action_dispatch/middleware/show_exceptions.rb#L148 :
+        # shows a cleaned stack for Rails apps by default
+        def cleaned_call_stack(call_stack)
+          defined?(Rails) && Rails.respond_to?(:backtrace_cleaner) ?
+            Rails.backtrace_cleaner.clean(call_stack, :silent) :
+            call_stack
+        end
+
 
       end
     end
