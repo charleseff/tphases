@@ -1,4 +1,4 @@
-# TPhases
+# TPhases 1
 
 [![Build Status](https://travis-ci.org/charleseff/tphases.png)](https://travis-ci.org/charleseff/tphases)
 
