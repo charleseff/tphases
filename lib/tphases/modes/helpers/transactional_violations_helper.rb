@@ -43,21 +43,32 @@ module TPhases
           end
 
           private
-          READ_QUERIES  = %w{update commit insert delete}
-          WRITE_QUERIES = %w{show select}
+          READ_QUERIES            = %w{show select describe}
+          WRITE_QUERIES           = %w{update commit insert delete}
+          RAILS_IGNORABLE_QUERIES = %w{describe}
+
+          def rails_ignorable_read_queries
+            @rails_ignorable_read_queries ||= READ_QUERIES - RAILS_IGNORABLE_QUERIES
+          end
 
           # determines if this query is a read transactional violation (if it is anything besides a read)
           def read_violation?(sql)
-            READ_QUERIES.include?(first_word(sql))
+            WRITE_QUERIES.include?(first_word(sql))
           end
 
           # determines if this query is a write transactional violation (if it is anything besides a write)
           def write_violation?(sql)
-            WRITE_QUERIES.include?(first_word(sql))
+            query_types = (Object.const_defined? :Rails) ? rails_ignorable_read_queries : READ_QUERIES
+            query_types.include?(first_word(sql))
           end
 
+          # violation unless it's Rails and we are running an ignorable query
           def no_transactions_violation?(sql)
-            true
+            if Object.const_defined? :Rails
+              !RAILS_IGNORABLE_QUERIES.include?(first_word(sql))
+            else
+              true
+            end
           end
 
           def first_word(str)
