@@ -1,6 +1,7 @@
 # TPhases
 
 [![Build Status](https://travis-ci.org/charleseff/tphases.png)](https://travis-ci.org/charleseff/tphases)
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/charleseff/tphases)
 
 TPhases (Transactional Phases) is a support framework that helps you build your Rails request life cycles into read-only, write-only, and no-transaction-allowed phases.
 
