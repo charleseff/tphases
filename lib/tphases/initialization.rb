@@ -5,6 +5,12 @@ module TPhases
     module ClassMethods
       # initiates TPhases.  Any overrides to config mode need to be made prior to running this.
       def initiate!
+        add_mode_methods!
+        add_rails_methods! if defined? Rails
+      end
+
+      private
+      def add_mode_methods!
         case config.mode
           when :pass_through
             require 'tphases/modes/pass_through_mode'
@@ -18,7 +24,6 @@ module TPhases
           else
             raise "TPhases mode must be one of :pass_through, :exceptions, or :collect, but instead is #{config.mode}"
         end
-
       end
 
     end
