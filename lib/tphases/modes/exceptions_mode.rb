@@ -1,5 +1,6 @@
 require 'tphases/transactional_violation'
 require 'tphases/modes/helpers/transactional_violations_helper'
+require 'tphases/modes/helpers/rails_helper'
 
 # the default 'development' mode, Exceptions Mode means that an exception will be raised
 # immediately inside of a TPhase block if a transactional violation occurs
@@ -8,6 +9,7 @@ module TPhases
     module ExceptionsMode
       extend ActiveSupport::Concern
       include Helpers::TransactionalViolationsHelper
+      include Helpers::RailsHelper if defined? Rails
 
       module ClassMethods
         private
