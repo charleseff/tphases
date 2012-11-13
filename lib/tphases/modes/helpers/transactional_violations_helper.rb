@@ -23,15 +23,13 @@ module TPhases
           def define_phase_methods!
             %w{read write no_transactions}.each do |phase_type|
               define_singleton_method(:"#{phase_type}_phase") do |&block|
+                return if @phase_stack.last.try(:ignored?)
                 phase = Phase.new
                 @phase_stack << phase
                 begin
                   subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |name, date, date2, sha, args|
                     next unless @phase_stack.last == phase
-                    if send(:"#{phase_type}_violation?", args[:sql])
-                      send(:"#{phase_type}_violation_action", args[:sql], caller)
-                    end
-
+                    send(:"#{phase_type}_violation_action", args[:sql], caller) if send(:"#{phase_type}_violation?", args[:sql])
                   end
                   block.call
                 ensure
@@ -40,6 +38,13 @@ module TPhases
                 end
               end
             end
+          end
+
+          def ignore_phases
+            @phase_stack << Phase.new(ignore: true)
+            yield
+          ensure
+            @phase_stack.pop
           end
 
           private
@@ -79,6 +84,13 @@ module TPhases
 
         # simple class to represent a phase on the stack of phases.  Used to determine which phase is active
         class Phase;
+          def initialize(opts={ ignore: false })
+            @ignore = opts[:ignore]
+          end
+
+          def ignored?
+            @ignore
+          end
         end
 
       end

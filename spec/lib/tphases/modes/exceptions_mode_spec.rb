@@ -98,5 +98,29 @@ describe TPhases::Modes::ExceptionsMode do
       end
       subject.instance_variable_get("@phase_stack").should be_empty
     end
+
+    context "ignore_phases inside of a no_transactions_phase" do
+      it "should allow all transactions" do
+        subject.no_transactions_phase do
+          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to raise_error
+          subject.ignore_phases do
+            expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
+          end
+          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to raise_error
+        end
+      end
+    end
+
+    context "no_transactions_phase inside of a ignore_phases" do
+      it "should allow all transactions" do
+        subject.ignore_phases do
+          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
+          subject.no_transactions_phase do
+            expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
+          end
+          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
+        end
+      end
+    end
   end
 end
