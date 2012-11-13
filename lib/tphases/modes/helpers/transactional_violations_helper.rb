@@ -23,7 +23,11 @@ module TPhases
           def define_phase_methods!
             %w{read write no_transactions}.each do |phase_type|
               define_singleton_method(:"#{phase_type}_phase") do |&block|
-                return if @phase_stack.last.try(:ignored?)
+
+                if @phase_stack.last.try(:ignored?)
+                  return block.call
+                end
+
                 phase = Phase.new
                 @phase_stack << phase
                 begin
@@ -31,7 +35,7 @@ module TPhases
                     next unless @phase_stack.last == phase
                     send(:"#{phase_type}_violation_action", args[:sql], caller) if send(:"#{phase_type}_violation?", args[:sql])
                   end
-                  block.call
+                  return block.call
                 ensure
                   ActiveSupport::Notifications.unsubscribe(subscriber)
                   @phase_stack.pop
