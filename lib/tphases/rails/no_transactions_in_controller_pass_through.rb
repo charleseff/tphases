@@ -3,7 +3,7 @@ module TPhases
     module NoTransactionsInControllerPassThrough
       extend ActiveSupport::Concern
       module ClassMethods
-        def ensure_no_transactions_on(actions)
+        def ensure_no_transactions_on(*actions)
           # do nothing
         end
       end

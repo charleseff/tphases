@@ -4,8 +4,9 @@ module TPhases
       extend ActiveSupport::Concern
       module ClassMethods
 
-        def ensure_no_transactions_on(actions)
-          class_variable_set(:@@no_transaction_actions, actions)
+        def ensure_no_transactions_on(*actions)
+          actions_array = *actions
+          class_variable_set(:@@no_transaction_actions, actions_array.flatten)
         end
 
       end
