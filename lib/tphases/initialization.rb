@@ -6,7 +6,7 @@ module TPhases
       # initiates TPhases.  Any overrides to config mode need to be made prior to running this.
       def initiate!
         add_mode_methods!
-        add_rails_methods! if defined? Rails
+        add_rails_methods! if defined? ::Rails
       end
 
       private

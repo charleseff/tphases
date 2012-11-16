@@ -9,7 +9,7 @@ module TPhases
     module CollectMode
       extend ActiveSupport::Concern
       include Helpers::TransactionalViolationsHelper
-      include Helpers::RailsHelper if defined? Rails
+      include Helpers::RailsHelper if defined? ::Rails
 
       included do
         add_rspec_after! if defined?(RSpec)
@@ -74,8 +74,8 @@ module TPhases
         # taken from https://github.com/rails/rails/blob/77977f34a5a4ea899f59e31ad869b582285fa5c1/actionpack/lib/action_dispatch/middleware/show_exceptions.rb#L148 :
         # shows a cleaned stack for Rails apps by default
         def cleaned_call_stack(call_stack)
-          defined?(Rails) && Rails.respond_to?(:backtrace_cleaner) ?
-            Rails.backtrace_cleaner.clean(call_stack, :silent) :
+          defined?(::Rails) && ::Rails.respond_to?(:backtrace_cleaner) ?
+            ::Rails.backtrace_cleaner.clean(call_stack, :silent) :
             call_stack
         end
 
