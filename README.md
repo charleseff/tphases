@@ -71,10 +71,7 @@ If a transactional violation occurs in a TPhase, the code will continue to run, 
 ### Methods
 
 #### `ensure_no_transactions_on`
-Call `ensure_no_transactions_on` on controllers to prevent DB transactions within the views of controller actions.  e.g.:
-
-#### `ignore_phases`
-Call `ignore_phases` to disable TPhases within the block passed
+Call `ensure_no_transactions_on` on controllers to prevent DB transactions within the view and action of a controller action.  e.g.:
 
 ```ruby
 class BarsController < ApplicationController
@@ -82,6 +79,10 @@ class BarsController < ApplicationController
   ensure_no_transactions_on [:show,:update]
 end
 ```
+
+#### `ignore_phases`
+Call `ignore_phases` to disable TPhases within the block passed
+
 
 
 ## Contributing
