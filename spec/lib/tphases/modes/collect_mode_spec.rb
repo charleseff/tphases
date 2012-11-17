@@ -5,61 +5,55 @@ require 'tphases/modes/collect_mode'
 describe TPhases::Modes::CollectMode do
   subject { Module.new { include TPhases::Modes::CollectMode } }
 
-  include_context "setup mode specs"
+  let(:sql) { "SELECT 1 FROM foo" }
+  let(:call_stack) { caller }
 
-  describe '.no_transactions_phase' do
-    it "should add to the violations list for all violations" do
-      expect {
-        subject.no_transactions_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to change { subject.send(:violations).size }.from(0).to(1)
+  context "violation actions" do
+    describe '.write_violation_action' do
+      it "should add to the violations list" do
+        expect { subject.send(:write_violation_action, sql, call_stack) }.
+            to change { subject.violations }.
+                   from([]).
+                   to([{ :type => :write, :call_stack => call_stack, :sql => sql }])
+      end
     end
 
-    it "should add multiple violations if there are multiple" do
-      expect {
-        subject.no_transactions_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to change { subject.send(:violations).size }.from(0).to(2)
+    describe '.read_violation_action' do
+      it "should add to the violations list" do
+        expect { subject.send(:read_violation_action, sql, call_stack) }.
+            to change { subject.violations }.
+                   from([]).
+                   to([{ :type => :read, :call_stack => call_stack, :sql => sql }])
+      end
     end
-  end
 
-  describe '.read_phase' do
-    it "should not add a violation for read transactions" do
-      expect {
-        subject.read_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to_not change { subject.send(:violations).size }
+    describe '.no_transactions_violation_action' do
+      it "should add to the violations list" do
+        expect { subject.send(:no_transactions_violation_action, sql, call_stack) }.
+            to change { subject.violations }.
+                   from([]).
+                   to([{ :type => :no_transactions, :call_stack => call_stack, :sql => sql }])
+      end
     end
-    it "should add a violation for write transactions" do
-      expect {
-        subject.read_phase do
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to change { subject.send(:violations).size }.from(0).to(1)
 
-    end
-  end
+    context "multiple violation actions" do
+      it "should add multiple values to the violations list" do
+        expect {
+          subject.send(:no_transactions_violation_action, sql, call_stack)
+          subject.send(:read_violation_action, sql, call_stack)
+          subject.send(:write_violation_action, sql, call_stack)
+        }.
+            to change { subject.violations }.
+                   from([]).
+                   to([
+                          { :type => :no_transactions, :call_stack => call_stack, :sql => sql },
+                          { :type => :read, :call_stack => call_stack, :sql => sql },
+                          { :type => :write, :call_stack => call_stack, :sql => sql },
+                      ])
 
-  describe '.write_phase' do
-    it "should not add a violation for write transactions" do
-      expect {
-        subject.write_phase do
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to_not change { subject.send(:violations).size }
-    end
-    it "should add a violation for read transactions" do
-      expect {
-        subject.write_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to change { subject.send(:violations).size }.from(0).to(1)
-
+      end
     end
   end
+
 
 end

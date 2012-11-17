@@ -1,4 +1,4 @@
 adapter: sqlite3
-database: spec/fixtures/database.sqlite3
+database: temp/database.sqlite3
 pool: 5
 timeout: 5000

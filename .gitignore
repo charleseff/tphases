@@ -20,4 +20,4 @@ doc/
 Gemfile.lock
 .idea
 
-spec/fixtures/database.sqlite3
+temp

@@ -5,122 +5,31 @@ require 'tphases/modes/exceptions_mode'
 describe TPhases::Modes::ExceptionsMode do
   subject { Module.new { include TPhases::Modes::ExceptionsMode } }
 
-  include_context "setup mode specs"
+  let(:sql) { "SELECT 1 FROM foo" }
+  let(:call_stack) { caller }
 
-  describe '.no_transactions_phase' do
-    it "should throw an exception disallow read and write transactions from running in this phase" do
-      expect {
-        subject.no_transactions_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to raise_error(ActiveRecord::StatementInvalid, "TransactionalViolation: #{read_sql} ran inside of a 'no_transactions_phase' block.: #{read_sql}")
-
-      expect {
-        subject.no_transactions_phase do
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to raise_error(ActiveRecord::StatementInvalid, "TransactionalViolation: #{write_sql} ran inside of a 'no_transactions_phase' block.: #{write_sql}")
+  context "violation actions" do
+    describe '.write_violation_action' do
+      it "should raise" do
+        expect { subject.send(:write_violation_action, sql, call_stack) }.
+            to raise_error(TransactionalViolation, "#{sql} ran inside of a 'write_phase' block.")
+      end
     end
+
+    describe '.read_violation_action' do
+      it "should raise" do
+        expect { subject.send(:read_violation_action, sql, call_stack) }.
+            to raise_error(TransactionalViolation, "#{sql} ran inside of a 'read_phase' block.")
+      end
+    end
+
+    describe '.no_transactions_violation_action' do
+      it "should raise" do
+        expect { subject.send(:no_transactions_violation_action, sql, call_stack) }.
+            to raise_error(TransactionalViolation, "#{sql} ran inside of a 'no_transactions_phase' block.")
+      end
+    end
+
   end
 
-  describe '.read_phase' do
-    it "should allow read transactions" do
-      expect {
-        subject.read_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to_not raise_error
-    end
-    it "should disallow write transactions" do
-      expect {
-        subject.read_phase do
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to raise_error(ActiveRecord::StatementInvalid, "TransactionalViolation: #{write_sql} ran inside of a 'read_phase' block.: #{write_sql}")
-
-    end
-  end
-
-  describe '.write_phase' do
-    it "should allow write transactions" do
-      expect {
-        subject.write_phase do
-          ActiveRecord::Base.connection.select_all(write_sql)
-        end
-      }.to_not raise_error
-    end
-    it "should disallow read transactions" do
-      expect {
-        subject.write_phase do
-          ActiveRecord::Base.connection.select_all(read_sql)
-        end
-      }.to raise_error(ActiveRecord::StatementInvalid, "TransactionalViolation: #{read_sql} ran inside of a 'write_phase' block.: #{read_sql}")
-
-    end
-  end
-
-  describe "nested phases" do
-    context "read_phase inside of a no_transactions_phase" do
-      it "should allow read transactions" do
-        expect {
-          subject.no_transactions_phase do
-            subject.read_phase do
-              ActiveRecord::Base.connection.select_all(read_sql)
-            end
-          end
-        }.to_not raise_error
-
-      end
-    end
-
-    context "no_transactions_phase inside a read_phase" do
-      it "should disallow read transactions" do
-        expect {
-          subject.read_phase do
-            subject.no_transactions_phase do
-              ActiveRecord::Base.connection.select_all(read_sql)
-            end
-          end
-        }.to raise_error(ActiveRecord::StatementInvalid, "TransactionalViolation: #{read_sql} ran inside of a 'no_transactions_phase' block.: #{read_sql}")
-
-
-      end
-    end
-
-    it "should have the right phase_stack sizes" do
-      subject.instance_variable_get("@phase_stack").should be_empty
-      subject.read_phase do
-        subject.instance_variable_get("@phase_stack").size.should == 1
-        subject.no_transactions_phase do
-          subject.instance_variable_get("@phase_stack").size.should == 2
-        end
-        subject.instance_variable_get("@phase_stack").size.should == 1
-      end
-      subject.instance_variable_get("@phase_stack").should be_empty
-    end
-
-    context "ignore_phases inside of a no_transactions_phase" do
-      it "should allow all transactions" do
-        subject.no_transactions_phase do
-          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to raise_error
-          subject.ignore_phases do
-            expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
-          end
-          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to raise_error
-        end
-      end
-    end
-
-    context "no_transactions_phase inside of a ignore_phases" do
-      it "should allow all transactions" do
-        subject.ignore_phases do
-          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
-          subject.no_transactions_phase do
-            expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
-          end
-          expect { ActiveRecord::Base.connection.select_all(read_sql) }.to_not raise_error
-        end
-      end
-    end
-  end
 end

@@ -1,5 +1,6 @@
 require 'active_support/notifications'
 require 'active_support/version'
+require 'active_support/core_ext/object/try'
 
 module TPhases
   module Modes
