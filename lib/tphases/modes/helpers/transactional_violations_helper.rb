@@ -14,9 +14,6 @@ module TPhases
 
         included do
           define_phase_methods!
-
-          # used to keep track of nested phases.  a nested phase overrides any prior phase.
-          @phase_stack = []
         end
 
         module ClassMethods
@@ -25,31 +22,36 @@ module TPhases
             %w{read write no_transactions}.each do |phase_type|
               define_singleton_method(:"#{phase_type}_phase") do |&block|
 
-                if @phase_stack.last.try(:ignored?)
+                if phase_stack.last.try(:ignored?)
                   return block.call
                 end
 
                 phase = Phase.new
-                @phase_stack << phase
+                phase_stack << phase
                 begin
                   subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |name, date, date2, sha, args|
-                    next unless @phase_stack.last == phase
+                    next unless phase_stack.last == phase
                     send(:"#{phase_type}_violation_action", args[:sql], caller) if send(:"#{phase_type}_violation?", args[:sql])
                   end
                   return block.call
                 ensure
                   ActiveSupport::Notifications.unsubscribe(subscriber)
-                  @phase_stack.pop
+                  phase_stack.pop
                 end
               end
             end
           end
 
+          # used to keep track of nested phases.  a nested phase overrides any prior phase.
+          def phase_stack
+            Thread.current[:tphases_phase_stack] ||= []
+          end
+
           def ignore_phases
-            @phase_stack << Phase.new(ignore: true)
+            phase_stack << Phase.new(ignore: true)
             yield
           ensure
-            @phase_stack.pop
+            phase_stack.pop
           end
 
           private

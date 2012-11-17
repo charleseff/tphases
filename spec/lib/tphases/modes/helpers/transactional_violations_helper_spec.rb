@@ -126,15 +126,15 @@ describe TPhases::Modes::Helpers::TransactionalViolationsHelper do
     end
 
     it "should have the right phase_stack sizes" do
-      subject.instance_variable_get("@phase_stack").should be_empty
+      subject.send(:phase_stack).should be_empty
       subject.read_phase do
-        subject.instance_variable_get("@phase_stack").size.should == 1
+        subject.send(:phase_stack).size.should == 1
         subject.no_transactions_phase do
-          subject.instance_variable_get("@phase_stack").size.should == 2
+          subject.send(:phase_stack).size.should == 2
         end
-        subject.instance_variable_get("@phase_stack").size.should == 1
+        subject.send(:phase_stack).size.should == 1
       end
-      subject.instance_variable_get("@phase_stack").should be_empty
+      subject.send(:phase_stack).should be_empty
     end
 
     context "ignore_phases inside of a no_transactions_phase" do
