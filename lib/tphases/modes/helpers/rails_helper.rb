@@ -12,8 +12,8 @@ module TPhases::Modes
 
         private
         def add_render_alias_method_chain!
-          unless Gem.loaded_specs.values.map { |value| value.full_gem_path }.any? { |n| n.include? "actionpack-3.0." }
-            raise "TPhases currently expects Rails version 3.0.* for patching ActionView template."
+          unless Gem.loaded_specs.values.map { |value| value.full_gem_path }.any? { |n| n.include? "actionpack-3." }
+            raise "TPhases currently expects Rails version 3.*.* for patching ActionView template."
           end
 
           ActionView::Template.class_eval do
